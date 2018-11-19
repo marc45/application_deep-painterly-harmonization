@@ -4,3 +4,9 @@ a.py
 e.py
 t.py
 
+*.pb
+waste/
+
+.project
+.pydevproject
+.settings/
