@@ -8,7 +8,10 @@ from __future__ import (absolute_import, division, print_function,
 # from rq import Connection, Queue, Worker
 
 from easyfoolish_mygirl.msg_mq_common import Jconfig
-from easyfoolish_mygirl.msg_mq_common import caffe2_pb2
+try :
+    from caffe2.proto import caffe2_pb2
+except ImportError :
+    from easyfoolish_mygirl.msg_mq_common import caffe2_pb2
 
 import numpy as np 
 import hashlib 
@@ -104,7 +107,7 @@ def get_jobs(mq_name,job_batch_size=1):
     
     for i in range(job_batch_size):
         data = Jconfig.redis_handle.lpop(mq_name)
-        print ("sacne...",mq_name)
+        #print ("sacne...",mq_name)
         if data is None :
             continue 
         mq_list.append(data)

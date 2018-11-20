@@ -17,7 +17,7 @@ import os
 import sys
 import time
 
-import redis_utils as util
+#import redis_utils as util
 import logging
 
 from caffe2.python import workspace
@@ -36,9 +36,11 @@ import detectron.utils.vis as vis_utils
 
 out_queue="detectron"
 in_queue="detectron_result"
+batch_size=1
 
 from easyfoolish_mygirl.msg_mq_common import Jconfig
 from easyfoolish_mygirl.msg_mq_common import mq_dataset
+import yaml 
 
 
 c2_utils.import_detectron_ops()
@@ -47,6 +49,7 @@ c2_utils.import_detectron_ops()
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
 
+
 class DtronImp:
     
     def __init__(self):
@@ -54,13 +57,16 @@ class DtronImp:
         pass 
     def listen (self,is_debug=True):
         ####################
+        args=yaml.load(open("./config/args.yaml"))
+        self.args=args
+        print (args)
         ######init  ops env 
         ####################
         
         self.logger = logging.getLogger(__name__)
-        merge_cfg_from_file(args.cfg)
+        merge_cfg_from_file(args["cfg"])
         cfg.NUM_GPUS = 1
-        weights = cfg.DOWNLOAD_CACHE
+        weights = args["weights"]
         assert_and_infer_cfg(cache_urls=False)
         
         assert not cfg.MODEL.RPN_ONLY, \
@@ -68,8 +74,10 @@ class DtronImp:
         assert not cfg.TEST.PRECOMPUTED_PROPOSALS, \
         'Models that require precomputed proposals are not supported'
         
-        model = infer_engine.initialize_model_from_cfg(weights)
-        dummy_coco_dataset = dummy_datasets.get_coco_dataset()
+        self.model = infer_engine.initialize_model_from_cfg(weights)
+        self.timers = defaultdict(Timer)
+
+        #dummy_coco_dataset = dummy_datasets.get_coco_dataset()
         
         with c2_utils.NamedCudaScope(0):
         ####################
@@ -85,19 +93,29 @@ class DtronImp:
                             print ("null.. return ")
                             break
                     continue 
+                print (len(data_recv))
+                self.logger.info(
+                    ' \ Note:  find a image ,shape: '+str(data_recv[0][2].shape)
+                )
+                collect_list = []                
+                for msg_id ,_, img  in data_recv:
+                    print (img.shape)
+                    matting = self._process(img)
+
+                    collect_list.append( (msg_id,img,matting) )
                 
-                self._process(data_recv)
-                
-                self._response()
+                self._response(collect_list)
                 
     def _getdata (self):
         _,mq_name = mq_dataset.build_key(None, out_queue)
         data_list = mq_dataset.get_jobs(mq_name, job_batch_size=batch_size)
-        data_list = [ (msg_id, normlize_item(data),data ) for msg_id ,data in data_list ]
+        data_list = [ (msg_id, None ,data ) for msg_id ,data in data_list ]
         return data_list
     
     def _process (self,im):
-        cls_boxes, cls_segms, cls_keyps = self.infer_engine.im_detect_all(
+        t = time.time()
+
+        cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
                 self.model, im, None, timers=self.timers
             )
         
@@ -118,26 +136,35 @@ class DtronImp:
             dataset=None,
             #box_alpha=0.3,
             show_class=True,
-            thresh=args.thresh,
-            kp_thresh=args.kp_thresh,
+            thresh=self.args["thresh"],
+            kp_thresh=self.args["kp_thresh"],
             #ext=args.output_ext,
             #out_when_no_box=args.out_when_no_box
         )
         return img 
-    def _response(self,im ):
-        img_return =self._process(im)
-        util.send(key,  util.encode(msg)  )
-        return key
+    def _response(self, cl_list ):
 
+        save_list = [] 
+        for msg_id ,rgb, matting in cl_list:
+            save_list.append( (msg_id,matting) )
+        mq_dataset.intermediate_job_finish(in_queue,save_list)
     
 
 if __name__=="__main__":
+    workspace.GlobalInit(['caffe2', '--caffe2_log_level=3'])
+
+    obj=DtronImp()
+    obj.listen(is_debug=False)
+
+
+    exit()
+
     import unittest
     import PIL.Image 
     import numpy as np 
     class xx(unittest.TestCase):
         def setUp(self):
-            p="./images/2009_000237.jpg"
+            p="../../../images/2009_000237.jpg"
             img = PIL.Image .open(p).convert("RGB")
             img = np.array(img)
         
@@ -152,6 +179,6 @@ if __name__=="__main__":
             ###init 
             obj.listen(is_debug=True)
     
-    unittest.main()
+    #unittest.main()
     
     
