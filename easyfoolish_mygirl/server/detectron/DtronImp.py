@@ -31,8 +31,9 @@ from detectron.utils.timer import Timer
 import detectron.core.test_engine as infer_engine
 import detectron.datasets.dummy_datasets as dummy_datasets
 import detectron.utils.c2 as c2_utils
-import detectron.utils.vis as vis_utils
 
+#import detectron.utils.vis as vis_utils
+import Dtron_vis as vis_utils
 
 out_queue="detectron"
 in_queue="detectron_result"
@@ -41,6 +42,7 @@ batch_size=1
 from easyfoolish_mygirl.msg_mq_common import Jconfig
 from easyfoolish_mygirl.msg_mq_common import mq_dataset
 import yaml 
+import numpy as np 
 
 
 c2_utils.import_detectron_ops()
@@ -86,25 +88,25 @@ class DtronImp:
             null_ct = 0
             while True :
                 data_recv = self. _getdata()
-                if data_recv is None :
+                if data_recv is None or len(data_recv)<=0 :
                     if is_debug :
                         null_ct+=1 
                         if null_ct>100:
-                            print ("null.. return ")
                             break
                     continue 
-                print (len(data_recv))
                 self.logger.info(
                     ' \ Note:  find a image ,shape: '+str(data_recv[0][2].shape)
                 )
                 collect_list = []                
                 for msg_id ,_, img  in data_recv:
-                    print (img.shape)
                     matting = self._process(img)
 
                     collect_list.append( (msg_id,img,matting) )
                 
                 self._response(collect_list)
+                self.logger.info(
+                    ' \ Note:  send a image ,len: '+str(len(collect_list) ) +"  \ "
+                )
                 
     def _getdata (self):
         _,mq_name = mq_dataset.build_key(None, out_queue)
@@ -126,7 +128,7 @@ class DtronImp:
             ' \ Note: inference on the first image will be slower than the '
             'rest (caches and auto-tuning need to warm up)'
         )
-        img=vis_utils.vis_one_image_opencv(
+        mask_list=vis_utils.vis_one_image_opencv_mask_list(
             im[:, :, ::-1],  # BGR -> RGB for visualization
             #im_name,
             #args.output_dir,
@@ -141,7 +143,7 @@ class DtronImp:
             #ext=args.output_ext,
             #out_when_no_box=args.out_when_no_box
         )
-        return img 
+        return np.array(mask_list )
     def _response(self, cl_list ):
 
         save_list = [] 
