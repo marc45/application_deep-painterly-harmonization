@@ -13,17 +13,17 @@ in_queue="transfer_result"
 from easyfoolish_mygirl.msg_mq_common import Jconfig
 from easyfoolish_mygirl.msg_mq_common import mq_dataset
 
-out_save= "./listen/data_listen"
-listen_dir="./listen/result_listen"
+scan_dir= "./listen/data_listen"
+save_dir="./listen/result_listen"
 
 
 def __init__env():
-    if not os.path.isdir(os.path.dirname(out_save)):
-        os.mkdir(os.path.dirname(out_save))
-    if not os.path.isdir(out_save):
-        os.mkdir(out_save)
-    if not os.path.isdir(listen_dir):
-        os.mkdir(listen_dir)
+    if not os.path.isdir(os.path.dirname(scan_dir)):
+        os.mkdir(os.path.dirname(scan_dir))
+    if not os.path.isdir(scan_dir):
+        os.mkdir(scan_dir)
+    if not os.path.isdir(save_dir):
+        os.mkdir(save_dir)
 
 __init__env()
 
@@ -38,7 +38,7 @@ def _process(data_list):
     for msg_id_c , _ , data in data_list :
         msg_id,_ =mq_dataset.build_key(msg_id_c,"tmp")
         msg_id= msg_id.replace("type:image,job:tmp,source_id:","")
-        fn_1_list= [ os.path.join( out_save,msg_id+"_"+x )  for x in ["c_mask.jpg","c_mask_dilated.jpg","naive.jpg","target.jpg"]  ] 
+        fn_1_list= [ os.path.join( scan_dir,msg_id+"_"+x )  for x in ["c_mask.jpg","c_mask_dilated.jpg","naive.jpg","target.jpg"]  ] 
 
         x1 = 0 
         for fn in fn_1_list :
@@ -48,24 +48,20 @@ def _process(data_list):
             x1 += 1
 
 def _listen_result_exist():
-    def _post_process(info_):
-        msg_id ,info_path = info_ 
+    def _post_process(msg_id,info_path):
         if os.path.isfile(info_path):
             data = cv2.imread(info_path)
-            msg_id_new = mq_dataset.build_key(msg_id , in_queue)
-            info_x=(msg_id_new,data)
+            info_x=(msg_id,data)
             msg_save_list = mq_dataset.intermediate_job_finish(in_queue, [info_x] )
     ##scan ....
     #0_final_res.jpg
-    ls_list = [ (x.replace("_final_res.jpg","") ,os.path.join(listen_dir,x) ) for x in os.listdir(listen_dir) ]
+    ls_list = [ (x.replace("_final_res.jpg","") ,os.path.join(save_dir,x) ) for x in os.listdir(save_dir) ]
     #[msg_id ,path ]
     for msg_id,path_info   in ls_list :
         
-        msg_id_redis = mq_dataset.build_key(msg_id,in_queue) 
+        msg_id_redis,_ = mq_dataset.build_key(msg_id,in_queue) 
         if not Jconfig.redis_handle.exists(msg_id_redis) :
-            _post_process((msg_id,path_info))
-
- 
+            _post_process(msg_id_redis,path_info)
 
      
 def run_while(is_debug=False):
@@ -89,22 +85,22 @@ if __name__=="__main__":
         return img
     class xx(unittest.TestCase):
         def setUp(self):
-            global out_queue,in_queue,out_save,listen_dir 
+            global out_queue,in_queue,scan_dir,save_dir 
 
             out_queue="unittest_transfer"
             in_queue="unittest_transfer_result"
 
-            out_save= "./unittest_listen/data_listen"
-            listen_dir="./unittest_listen/result_listen"
+            scan_dir= "./unittest_listen/data_listen"
+            save_dir="./unittest_listen/result_listen"
             self.tearDown()
 
 
-            if not os.path.isdir(os.path.dirname(out_save)):
-                os.mkdir(os.path.dirname(out_save))
-            if not os.path.isdir(out_save):
-                os.mkdir(out_save)
-            if not os.path.isdir(listen_dir):
-                os.mkdir(listen_dir)
+            if not os.path.isdir(os.path.dirname(scan_dir)):
+                os.mkdir(os.path.dirname(scan_dir))
+            if not os.path.isdir(scan_dir):
+                os.mkdir(scan_dir)
+            if not os.path.isdir(save_dir):
+                os.mkdir(save_dir)
 
 
 
@@ -117,7 +113,7 @@ if __name__=="__main__":
 
             for i,(x,y) in enumerate(self.msg_list  ):
                 x=x.replace("type:image,job:unittest_transfer,source_id:","")
-                fn=os.path.join(listen_dir,x+"_final_res.jpg")
+                fn=os.path.join(save_dir,x+"_final_res.jpg")
                 da= create () 
                 cv2.imwrite(fn,da)
 
@@ -129,21 +125,23 @@ if __name__=="__main__":
             return_msg_id= [os.path.basename(x) for x,y in self.msg_list ]
             return_msg_id=sorted(return_msg_id)
 
-            scan_list = os.listdir(out_save) 
+            scan_list = os.listdir(scan_dir) 
             aa_msg_id= ["type:image,job:unittest_transfer,source_id:"+os.path.basename(y).replace("_naive.jpg","") for y in scan_list if "_naive" in y ]
             aa_msg_id=sorted(aa_msg_id)
-            print "========"*4
-            print aa_msg_id,return_msg_id
             print "========"*4
             self.assertTrue(set(aa_msg_id)==set(return_msg_id))
 
         def test_02_listen_result_exist(self):
             _listen_result_exist()
             ###
+            #build disk fn 
+            exist_list = [os.path.basename(x) for x in  os.listdir(save_dir) ]
+            build_list = [ x.split("source_id:") [-1] + "_final_res.jpg"   for x,_ in self.msg_list]
+
+            self.assertTrue(set(exist_list)==set(build_list))
             ## assert save success 
-            for msg_id in self. msg_list :
+            for msg_id,_ in self. msg_list :
                 msg_id_redis,_ = mq_dataset.build_key(msg_id,in_queue)
-                print msg_id_redis 
                 self.assertTrue(Jconfig.redis_handle.exists(msg_id_redis))
 
 
@@ -158,8 +156,8 @@ if __name__=="__main__":
                 Jconfig.redis_handle.delete(k)
             import shutil 
             self.image_list = []
-            if os.path.isdir("./unittest_listen"):
-                shutil.rmtree("./unittest_listen")
+            #if os.path.isdir("./unittest_listen"):
+            #    shutil.rmtree("./unittest_listen")
 
 
             
