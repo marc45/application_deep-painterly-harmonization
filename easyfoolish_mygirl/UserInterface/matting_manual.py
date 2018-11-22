@@ -1,3 +1,5 @@
+from __future__ import print_function,absolute_import,unicode_literals
+
 import cv2
 import numpy as np 
 
@@ -30,6 +32,8 @@ def manual_annoting(img):
 
 
 if __name__=="__main__":
+    cv2.namedWindow("a",cv2.WINDOW_NORMAL)
+
     p="/Users/a11/Desktop/transfer_material/569e220a21f29be933f37742.jpg"
     img=cv2.imread(p)
 

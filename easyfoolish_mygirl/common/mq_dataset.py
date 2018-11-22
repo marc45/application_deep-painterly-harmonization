@@ -105,23 +105,33 @@ def get_jobs(mq_name,job_batch_size=1):
     mq_list = []
     data_list = []
     
+    print ("decode queue.......",mq_name)
     for i in range(job_batch_size):
+
         data = Jconfig.redis_handle.lpop(mq_name)
-        #print ("sacne...",mq_name)
         if data is None :
             continue 
         mq_list.append(data)
+    if len(mq_list)<=0 :
+        return None 
     for msg_id in mq_list : 
-        data = Jconfig.redis_handle.get(msg_id)
-        data = decode_msg(data)
-        if data is None :
-            continue
-        data_list.append(( msg_id,data) )
+        msg_info = get_msg_info(msg_id)
+        
+        data_list.append(msg_info )
     ##parse 
+    print ("decode success.......",len(data_list),len(mq_list))
     return data_list 
 #     if job_batch_size >1 :
 #         raise Exception ("not support batch ,will be implemented in future  ")
+def is_exist(msg_id):
+    return Jconfig.redis_handle.exists(msg_id)
 
+def get_msg_info(msg_id):
+    data = Jconfig.redis_handle.get(msg_id)
+    data = decode_msg(data)
+    if data is None :
+        print ("decode fail.......")
+    return ( msg_id,data) 
 
 def intermediate_job_finish(mq_name,data_list=[]):
     '''
@@ -140,7 +150,7 @@ def intermediate_job_finish(mq_name,data_list=[]):
         is_cess = Jconfig.redis_handle.set(msg_str,data,Jconfig.EXPIRE_TIME)
         if is_cess  :        
             Jconfig.redis_handle.rpush(mq_str,msg_str)
-    return [x for x,y  in data_list_encode ]
+    return [x for (x,_),y  in data_list_encode ]
 #     if job_batch_size >1 :
 #         raise Exception ("not support batch ,will be implemented in future  ")
 
