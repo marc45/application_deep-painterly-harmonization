@@ -21,6 +21,13 @@ function call()
         break
     end
 
+    if cmd_list then
+        if table.getn(cmd_list)==0 then
+            return
+        end
+    end
+
+
     argx ={}
     for old_i ,pp in pairs(arg) do 
         if old_i<=0 then 
@@ -41,7 +48,12 @@ function call()
     require "neural_paint"
 end 
 
-call()
+
+
+while 1==1 do 
+    if pcall(call) then
+    end
+end
 
 
 

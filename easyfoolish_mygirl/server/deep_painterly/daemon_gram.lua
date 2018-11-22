@@ -20,6 +20,11 @@ function call()
 
         break
     end
+    if cmd_list then
+        if table.getn(cmd_list)==0 then 
+            return 
+        end
+    end
 
     argx ={}
     for old_i ,pp in pairs(arg) do 
@@ -40,7 +45,13 @@ function call()
     require "neural_gram"
 end 
 
-call()
+
+
+while 1==1 do 
+    if pcall(call) then
+    end
+end
+
 
 
 
