@@ -11,7 +11,8 @@ local scaner = require("scan")
 
 
 function call()
-    local rt = scaner.run()
+    local rt = ""
+    _,rt = scaner.run()
     cmd_list = {} 
     for  _,tbx in ipairs(rt) do 
         local params1 = tbx.tb2 
@@ -49,8 +50,9 @@ function call()
 end 
 
 
-
+--call()
 while 1==1 do 
+    --call()
     if pcall(call) then
     end
 end

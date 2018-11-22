@@ -144,28 +144,44 @@ function SCAN.run()
     local d1 = SCAN.distill_table( SCAN.scanfolder( SCAN.scan_dir ))
 -- out 
     --local d3 = SCAN.distill_table( SCAN.scanfolder( SCAN.save_dir ))
-
     local d2 = {}
-
+    local d3 = {}
     for i,item in ipairs(d1) do 
         local fn = item .. "_final_res.jpg"
         fn  =paths.concat( SCAN. save_dir , fn) 
-
         if  SCAN.file_exists(fn) ==false then 
-            table.insert(d2,item)
-        end
+            -- if inter exist  d3.append()
+            -- else d2.append()
+            --
+            local fn1 = item .. "_inter_res.jpg"
+            fn1  =paths.concat( SCAN. save_dir , fn1)
 
+            if  SCAN.file_exists(fn1) == false then
+                table.insert(d2,item)
+            else
+                table.insert(d3,item)
+            end
+
+        end
     end
 
-    local work_list = d2
+    local ret3 = SCAN.build_cmd(d3)
+    local ret2 = SCAN.build_cmd(d2)
 
-    local ret = SCAN.build_cmd(work_list)
+    local ret3 = SCAN.shuffle(ret3)
+    local ret2 = SCAN.shuffle(ret2)
 
-
-    return ret
+    return ret2,ret3
 
 end
 
 
+function SCAN.shuffle(tbl)
+  for i = #tbl, 1, -1 do
+    local j = math.random(i)
+    tbl[i], tbl[j] = tbl[j], tbl[i]
+  end
+  return tbl
+end
 
 return SCAN

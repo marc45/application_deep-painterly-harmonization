@@ -11,7 +11,8 @@ local scaner = require("scan")
 
 
 function call()
-    local rt = scaner.run()
+    local rt = ""
+    rt,_ = scaner.run()
     cmd_list = {} 
     for  _,tbx in ipairs(rt) do 
         local params1 = tbx.tb1 
