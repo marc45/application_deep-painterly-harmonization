@@ -10,8 +10,8 @@ batch_size =8
 out_queue="transfer"
 in_queue="transfer_result"
 
-from easyfoolish_mygirl.msg_mq_common import Jconfig
-from easyfoolish_mygirl.msg_mq_common import mq_dataset
+from easyfoolish_mygirl.common import Jconfig
+from easyfoolish_mygirl.common import mq_dataset
 
 scan_dir= "./listen/data_listen"
 save_dir="./listen/result_listen"

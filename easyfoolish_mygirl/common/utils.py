@@ -4,7 +4,7 @@
 # @author: wangjian7
 # '''
 # 
-# from msg_mq_common import  caffe2_pb2 
+# from common import  caffe2_pb2 
 # import numpy as np 
 # 
 #   

@@ -9,8 +9,8 @@ batch_size =8
 out_queue="portrait_seg_tf"
 in_queue="merge_tf"
 
-from easyfoolish_mygirl.msg_mq_common import Jconfig
-from easyfoolish_mygirl.msg_mq_common import mq_dataset
+from easyfoolish_mygirl.common import Jconfig
+from easyfoolish_mygirl.common import mq_dataset
 
 sess,output,input_x =None ,None ,None
 

@@ -7,11 +7,11 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 # from rq import Connection, Queue, Worker
 
-from easyfoolish_mygirl.msg_mq_common import Jconfig
+from easyfoolish_mygirl.common import Jconfig
 try :
     from caffe2.proto import caffe2_pb2
 except ImportError :
-    from easyfoolish_mygirl.msg_mq_common import caffe2_pb2
+    from easyfoolish_mygirl.common import caffe2_pb2
 
 import numpy as np 
 import hashlib 

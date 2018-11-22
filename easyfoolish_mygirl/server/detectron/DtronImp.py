@@ -39,8 +39,8 @@ out_queue="detectron"
 in_queue="detectron_result"
 batch_size=1
 
-from easyfoolish_mygirl.msg_mq_common import Jconfig
-from easyfoolish_mygirl.msg_mq_common import mq_dataset
+from easyfoolish_mygirl.common import Jconfig
+from easyfoolish_mygirl.common import mq_dataset
 import yaml 
 import numpy as np 
 

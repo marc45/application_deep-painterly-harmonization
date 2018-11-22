@@ -7,7 +7,7 @@ from __future__ import print_function,absolute_import,unicode_literals
 
 import cv2
 import numpy as np 
-from easyfoolish_mygirl.msg_mq_common import mq_dataset
+from easyfoolish_mygirl.common import mq_dataset
 from easyfoolish_mygirl.common import Jconfig
 import util 
 
