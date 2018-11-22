@@ -151,9 +151,9 @@ if __name__=="__main__":
             save_list = [img] *13 
             mq_dataset.intermediate_job_finish(out_queue,save_list)
         
-        def test_tf_seg(self):
-            ###init 
-            run_while(is_debug=True)
+#         def test_tf_seg(self):
+#             ###init 
+#             run_while(is_debug=True)
     
     unittest.main()
     

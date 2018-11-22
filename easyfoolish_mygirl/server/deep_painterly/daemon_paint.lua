@@ -1,3 +1,6 @@
+--[[
+  copy from 3rdparts/deep-painterly-harmonization/neural_paint.lua
+--]]
 require 'torch'
 
 local cmd2 = torch.CmdLine()
@@ -43,7 +46,9 @@ cmd2:option('-ring_radius', 1)
 cmd2:option('-wikiart_fn', 'wikiart_output.txt')
 
 
-
+--[[
+ end copy from 3rdparts/deep-painterly-harmonization/neural_paint.lua
+--]]
 --local params = cmd:parse()
 --local params2 = cmd:parse()
 

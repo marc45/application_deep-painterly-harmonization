@@ -1,5 +1,7 @@
+--[[
+ copy from 3rdparts/deep-painterly-harmonization/neural_gram.lua
+--]]
 require 'torch'
-
 local cmd = torch.CmdLine()
 
 -- Basic options
@@ -40,7 +42,9 @@ cmd:option('-style_layers',   'relu3_1,relu4_1,relu5_1', 'layers for style')
 -- Patchmatch
 cmd:option('-patchmatch_size', 3)
 
-
+--[[
+ end copy from 3rdparts/deep-painterly-harmonization/neural_gram.lua
+--]]
 --local params = cmd:parse()
 --local params2 = cmd:parse()
 

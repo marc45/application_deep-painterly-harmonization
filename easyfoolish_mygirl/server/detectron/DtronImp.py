@@ -150,17 +150,15 @@ class DtronImp:
         for msg_id ,rgb, matting in cl_list:
             save_list.append( (msg_id,matting) )
         mq_dataset.intermediate_job_finish(in_queue,save_list)
-    
 
-if __name__=="__main__":
+def run_while():    
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=3'])
 
     obj=DtronImp()
     obj.listen(is_debug=False)
 
 
-    exit()
-
+if __name__=="__main__":
     import unittest
     import PIL.Image 
     import numpy as np 
