@@ -1,0 +1,9 @@
+[submodule "3rdparts/deep-painterly-harmonization"]
+	path = 3rdparts/deep-painterly-harmonization
+	url = https://github.com/luanfujun/deep-painterly-harmonization.git
+[submodule "3rdparts/Detectron"]
+	path = 3rdparts/Detectron
+	url = https://github.com/facebookresearch/Detectron.git
+[submodule "3rdparts/pytorch-semseg"]
+	path = 3rdparts/pytorch-semseg
+	url = https://github.com/meetshah1995/pytorch-semseg.git
