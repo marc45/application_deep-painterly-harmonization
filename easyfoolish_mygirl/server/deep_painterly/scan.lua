@@ -6,10 +6,11 @@ local SCAN = {}
 SCAN.scan_dir = "./listen/data_listen/"
 SCAN.save_dir = "./listen/result_listen/"
 
+SCAN.data_wiki = "../../../3rdparts/deep-painterly-harmonization/"
 
 function SCAN.file_exists (pathx)
     local flg =false
-    if paths.filep('your_desired_file_path') then
+    if paths.filep(pathx) then
         flg=true
     else
         flg=false
@@ -35,7 +36,7 @@ end
 
 function SCAN.distill_table(d1)
 --for k in next,l do l[k] = l[k]:gsub("#", "") end
-    ret = {}
+    local ret = {}
     for kk,k in ipairs(d1) do
         if string.find(k,"naive") then
             local sid = string.gsub(k,"_naive.jpg","")
@@ -59,46 +60,53 @@ function SCAN.distill_table(d1)
     return ret
 end
 
---[[
-function SCAN.difference(a,b)
-    function _find(a, tbl)
-        for _,a_ in ipairs(tbl) do if a_==a then return true end end
-    end
-    local ret = {}
-    for _,a_ in ipairs(a) do
-        if not _find(a_,b) then table.insert(ret, a_) end
-    end
-    return ret
-end
---]]
---
 function SCAN.build_cmd (dlist) 
 
+    local function deepcopy(orig)
+        local orig_type = type(orig)
+        local copy
+        if orig_type == 'table' then
+            copy = {}
+            for orig_key, orig_value in next, orig, nil do
+                copy[deepcopy(orig_key)] = deepcopy(orig_value)
+            end
+            setmetatable(copy, deepcopy(getmetatable(orig)))
+        else -- number, string, boolean, etc
+            copy = orig
+        end
+        return copy
+    end
+
     local function _build_cmd(msg_id,prefix,save_dir) 
+
         tb={}
-        tb.content_image = prefix .. msg_id .. "_naive.jpg" 
-        tb.style_image = prefix .. msg_id .. "_target.jpg"
-        tb.tmask_image = prefix .. msg_id .. "_c_mask.jpg"
-        tb.mask_image = prefix .. msg_id .. "_c_mask_dilated.jpg" 
+        tb. model_file = paths.concat(paths.cwd(), SCAN.data_wiki, "models/VGG_ILSVRC_19_layers.caffemodel" )
+        tb. proto_file = paths.concat(paths.cwd(), SCAN.data_wiki, "models/VGG_ILSVRC_19_layers_deploy.prototxt" )
+
+        tb.content_image = paths .concat(prefix, msg_id .. "_naive.jpg" )
+        tb.style_image = paths .concat(prefix , msg_id .. "_target.jpg")
+        tb.tmask_image = paths .concat(prefix, msg_id .. "_c_mask.jpg")
+        tb.mask_image = paths .concat(prefix ,msg_id .. "_c_mask_dilated.jpg" )
         tb.original_colors = 0 
         tb.image_size = 700
-        tb.output_image = SCAN.save_dir ..  msg_id .. "_inter_res.jpg"
+        tb.output_image =  paths .concat( SCAN.save_dir ,  msg_id .. "_inter_res.jpg")
         tb.save_iter = 0
         tb.print_iter =100 
 
 
-        tb2 = {}
-        for j,x in ipairs(tb) do tb2[j] = x end
+        tb2 = deepcopy(tb)
+        --for j,x in ipairs(tb) do tb2[j] = x end
 
         tb2.index = 0
-        tb2.wikiart_fn = "data/wikiart_output.txt"
+        --tb2.wikiart_fn = "data/wikiart_output.txt"
+        tb2.wikiart_fn =paths.concat(paths.cwd(), SCAN.data_wiki,"data/wikiart_output.txt")
         tb2.cnnmrf_image = tb.output_image
-        tb2. output_image = SCAN.save_dir ..  msg_id .. "_final_res.jpg"
+        tb2. output_image = paths .concat( SCAN.save_dir ,  msg_id .. "_final_res.jpg" )
         tb2.num_iterations = 1000
-        tb2.content_image = prefix .. msg_id .. "_naive.jpg" 
-        tb2.style_image = prefix .. msg_id .. "_target.jpg"
-        tb2.tmask_image = prefix .. msg_id .. "_c_mask.jpg"
-        tb2.mask_image = prefix .. msg_id .. "_c_mask_dilated.jpg" 
+--        tb2.content_image = paths .concat(prefix, msg_id .. "_naive.jpg" ) 
+--        tb2.style_image = paths .concat(prefix, msg_id .. "_target.jpg" )
+--        tb2.tmask_image = paths .concat(prefix, msg_id .. "_c_mask.jpg")
+--        tb2.mask_image = paths .concat(prefix, msg_id .. "_c_mask_dilated.jpg" )
 
 
         local tb3 = SCAN.file_exists(tb.output_image)
@@ -110,7 +118,7 @@ function SCAN.build_cmd (dlist)
 
     cmd_list = {}
     for k,item in ipairs(dlist) do 
-        tb1 ,tb2 ,tb3 = _build_cmd(item, SCAN.scan_dir,SCAN.save_dir)
+        tb1 ,tb2  = _build_cmd(item, SCAN.scan_dir,SCAN.save_dir)
         cmd_item = {}
         cmd_item.tb1 =tb1 
         cmd_item.tb2 =tb2 
@@ -131,21 +139,28 @@ function SCAN.run()
     end
 
 -- in 
-
-    local d1 = SCAN.distill_table( SCAN.scanfolder(SCAN.scan_dir) )
+    SCAN. scan_dir =paths .concat ( paths.cwd(SCAN.scan_dir) , SCAN.scan_dir)
+    SCAN. save_dir =paths .concat ( paths.cwd(SCAN.save_dir) , SCAN.save_dir)
+    local d1 = SCAN.distill_table( SCAN.scanfolder( SCAN.scan_dir ))
 -- out 
-    local d2 = SCAN.distill_table( SCAN.scanfolder(SCAN.save_dir) )
+    --local d3 = SCAN.distill_table( SCAN.scanfolder( SCAN.save_dir ))
 
+    local d2 = {}
 
-    work_list = {}
-    for _,ex in ipairs(d1) do 
-        if  contains(d2,ex) == false then 
-            table.insert(work_list,ex)
+    for i,item in ipairs(d1) do 
+        local fn = item .. "_final_res.jpg"
+        fn  =paths.concat( SCAN. save_dir , fn) 
+
+        if  SCAN.file_exists(fn) ==false then 
+            table.insert(d2,item)
         end
+
     end
 
+    local work_list = d2
 
     local ret = SCAN.build_cmd(work_list)
+
 
     return ret
 
