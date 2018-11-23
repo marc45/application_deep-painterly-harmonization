@@ -14,8 +14,8 @@ python -c 'from caffe2.python import core' 2>/dev/null && echo "Success" || echo
 
 
 cd deep_painterly 
-CUDA_VISIBLE_DEVICES=0 nohup  th daemon_gram.lua >a1.log&
-CUDA_VISIBLE_DEVICES=0 nohup  th daemon_paint.lua >a2.log&
+CUDA_VISIBLE_DEVICES=0 nohup  python daemon_gram.py >a1.log&
+CUDA_VISIBLE_DEVICES=0 nohup  python daemon_paint.py >a2.log&
 nohup    python daemon.py  2>&1 >a3.log &
 cd ../ 
 

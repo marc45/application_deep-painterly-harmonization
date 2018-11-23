@@ -43,19 +43,21 @@ function call()
     end
 
     arg = argx
-    print (arg)
+    --print (arg)
 
     package.loaded[ 'neural_paint' ] = nil
     require "neural_paint"
 end 
 
 
---call()
-while 1==1 do 
-    --call()
-    if pcall(call) then
-    end
+call()
+
+--[[while 1==1 do 
+    call()
+    --if pcall(call) then
+    --end
 end
 
-
+--]]
+--
 

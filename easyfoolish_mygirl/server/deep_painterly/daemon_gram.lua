@@ -49,11 +49,13 @@ end
 
 
 
-while 1==1 do 
-    if pcall(call) then
-    end
-end
+--while 1==1 do 
+--    if pcall(call) then
+--    end
+--end
 
 
+
+call()
 
 
