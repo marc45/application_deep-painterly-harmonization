@@ -88,9 +88,10 @@ function SCAN.build_cmd (dlist)
         tb.tmask_image = paths .concat(prefix, msg_id .. "_c_mask.jpg")
         tb.mask_image = paths .concat(prefix ,msg_id .. "_c_mask_dilated.jpg" )
         tb.original_colors = 0 
+        tb.num_iterations = 600
         tb.image_size = 700
         tb.output_image =  paths .concat( SCAN.save_dir ,  msg_id .. "_inter_res.jpg")
-        tb.save_iter = 0
+        tb.save_iter = 500
         tb.print_iter =100 
 
 
@@ -102,7 +103,7 @@ function SCAN.build_cmd (dlist)
         tb2.wikiart_fn =paths.concat(paths.cwd(), SCAN.data_wiki,"data/wikiart_output.txt")
         tb2.cnnmrf_image = tb.output_image
         tb2. output_image = paths .concat( SCAN.save_dir ,  msg_id .. "_final_res.jpg" )
-        tb2.num_iterations = 1000
+        tb2.num_iterations = 600
 --        tb2.content_image = paths .concat(prefix, msg_id .. "_naive.jpg" ) 
 --        tb2.style_image = paths .concat(prefix, msg_id .. "_target.jpg" )
 --        tb2.tmask_image = paths .concat(prefix, msg_id .. "_c_mask.jpg")

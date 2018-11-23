@@ -58,8 +58,13 @@ class DtronImp:
 
         pass 
     def listen (self,is_debug=True):
+
+        currt =   os.path.dirname(os.path.abspath(__file__))
+        l1 = "./config/args.yaml"
+        l1 = os.path.join(currt,l1)
+
         ####################
-        args=yaml.load(open("./config/args.yaml"))
+        args=yaml.load(open(l1))
         self.args=args
         print (args)
         ######init  ops env 
@@ -111,6 +116,8 @@ class DtronImp:
     def _getdata (self):
         _,mq_name = mq_dataset.build_key(None, out_queue)
         data_list = mq_dataset.get_jobs(mq_name, job_batch_size=batch_size)
+        if data_list is None or len(data_list) <=0:
+            return []
         data_list = [ (msg_id, None ,data ) for msg_id ,data in data_list ]
         return data_list
     

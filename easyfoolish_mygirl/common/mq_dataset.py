@@ -105,7 +105,6 @@ def get_jobs(mq_name,job_batch_size=1):
     mq_list = []
     data_list = []
     
-    print ("decode queue.......",mq_name)
     for i in range(job_batch_size):
 
         data = Jconfig.redis_handle.lpop(mq_name)
@@ -119,7 +118,6 @@ def get_jobs(mq_name,job_batch_size=1):
         
         data_list.append(msg_info )
     ##parse 
-    print ("decode success.......",len(data_list),len(mq_list))
     return data_list 
 #     if job_batch_size >1 :
 #         raise Exception ("not support batch ,will be implemented in future  ")

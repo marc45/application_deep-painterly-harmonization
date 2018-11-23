@@ -1,4 +1,6 @@
 #! -*- coding: utf-8 -*-
+import sys,os
+print ("search ...",sys.executable)
 
 import tensorflow as tf
 from PIL import Image
@@ -45,6 +47,8 @@ def normlize_item(origin_image_np):
 def _get_data():
     _,mq_name = mq_dataset.build_key(None, out_queue)
     data_list = mq_dataset.get_jobs(mq_name, job_batch_size=batch_size)
+    if data_list is None or len(data_list)<=0 :
+        return []
     data_list = [ (msg_id, normlize_item(data),data ) for msg_id ,data in data_list ]
     return data_list
 
@@ -81,7 +85,11 @@ def run_while(is_debug=False):
 
     with tf.Graph().as_default():
         output_graph_def = tf.GraphDef()
+
+        currt =   os.path.dirname(os.path.abspath(__file__)) 
+
         output_graph_path = './checkpoint/frozen_model.pb'
+        output_graph_path = os.path.join(currt,output_graph_path)
     
     
         with open(output_graph_path, "rb") as f:
