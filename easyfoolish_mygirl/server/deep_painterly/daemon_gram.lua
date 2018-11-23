@@ -43,6 +43,7 @@ function call()
     arg = argx
 
 
+    package.loaded[ 'neural_gram' ] = nil
     require "neural_gram"
 end 
 

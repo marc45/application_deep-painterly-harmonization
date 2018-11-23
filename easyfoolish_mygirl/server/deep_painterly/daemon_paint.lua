@@ -45,7 +45,7 @@ function call()
     arg = argx
     print (arg)
 
-
+    package.loaded[ 'neural_paint' ] = nil
     require "neural_paint"
 end 
 
